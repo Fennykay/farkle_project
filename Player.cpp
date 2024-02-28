@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 
+using namespace std;
+
 
 Player::Player() {
     name = "Player";
@@ -20,11 +22,11 @@ std::string Player::getName() {
 }
 
 
-std::vector<Dice> Player::getSavedDice() {
+vector<vector<Dice>> Player::getSavedDice() {
     return savedDice;
 }
 
-void Player::saveDice(Dice d) {
+void Player::saveDice(vector<Dice> d) {
     savedDice.push_back(d);
 }
 
@@ -33,8 +35,27 @@ void Player::resetSavedDice() {
 }
 
 void Player::displaySavedDice() {
-    for (Dice d : savedDice) {
-        std::cout << d.getValue() << " ";
+    for (vector<Dice> d : savedDice) {
+        for (Dice die : d) {
+            std::cout << die.getValue() << " ";
+        }
     }
-    std::cout << std::endl;
+    cout << endl;
+}
+
+void Player::addTempScore(int score) {
+    tempScore += score;
+}
+
+void Player::resetTempScore() {
+    tempScore = 0;
+}
+
+int Player::combineScores() {
+    score += tempScore;
+    return score;
+}
+
+int Player::getScore() {
+    return score;
 }

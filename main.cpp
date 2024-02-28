@@ -30,6 +30,7 @@ void printDice(std::vector<Dice>& dice) {
 
 std::vector<Dice>& pickDiceToKeep(std::vector<Dice>& dice, Player& player) {
     bool keepPicking = true;
+    vector<Dice> diceToKeep;
     std::string input;
     while (keepPicking) {
         int diceChoice;
@@ -41,8 +42,7 @@ std::vector<Dice>& pickDiceToKeep(std::vector<Dice>& dice, Player& player) {
             std::cout << "Invalid choice. Please try again." << std::endl;
             continue;
         } 
-
-        player.saveDice(dice[diceChoice - 1]);
+        diceToKeep.push_back(dice[diceChoice - 1]);
         dice.erase(dice.begin() + diceChoice - 1);
         
         std::cout << "Would you like to keep more dice? (y/n): ";
@@ -63,28 +63,33 @@ int main() {
     bool play = true;
     int diceChoice;
     std::string input;
-    std::vector<Dice> dice = {Dice(), Dice(), Dice(), Dice(), Dice(), Dice()};
+    std::vector<Dice> diceSet = {Dice(), Dice(), Dice(), Dice(), Dice(), Dice()};
 
     std::vector<Player> players = initPlayers();
 
     while (play) {
-        for (Dice& d : dice) {
+        for (Dice& d : diceSet) {
             d.roll();
         }
-        dice = pickDiceToKeep(dice, players[0]);
+        diceSet = pickDiceToKeep(diceSet, players[0]);
 
         std::cout << "Do you want to roll again? (y/n): ";
         std::cin >> input;
-        
+
         if (input == "n") {
             play = false;
         }
 
-        for (Dice& playerDice : players[0].getSavedDice()) {
-            std::cout << playerDice.getValue() << " ";
+        for (vector<Dice> d : players[0].getSavedDice()) {
+            for (Dice die : d) {
+                std::cout << die.getValue() << " ";
+            }
         }
 
-        std::cout << "Score: " << gameRunner.computeScore(players[0].getSavedDice()) << std::endl;
+        for (vector<Dice> d : players[0].getSavedDice()) {
+            gameRunner.addScore(gameRunner.computeScore(d));
+            cout << 
+        }
     }
     return 0;
 }

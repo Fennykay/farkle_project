@@ -5,24 +5,20 @@
 
 
 
-int GameRunner::getScore() {
-    return score;
+int GameRunner::getScore(Player player) {
+    return player.getScore();
 }
 
-void GameRunner::addScore(int score) {
-    this->score += score;
+void GameRunner::addScore(int score, Player player) {
+    score += score;
 }
 
-void GameRunner::resetScore() {
-    score = 0;
+void GameRunner::resetScore(Player player) {
+    player.setScore(0);
 }
 
-void GameRunner::setPlayer(Player player) {
-    this->player = player;
-}
-
-bool GameRunner::isWinner() {
-    return score >= 10000;
+bool GameRunner::isWinner(Player player) {
+    return player.getScore() >= 10000;
 }
 
 int GameRunner::computeScore(std::vector<Dice> dice) {
@@ -49,7 +45,7 @@ int GameRunner::computeScore(std::vector<Dice> dice) {
         }
     }
     if (counts[0] == 1) {
-        score += 50;
+        score += 100;
     }
     if (counts[4] == 1) {
         score += 50;
