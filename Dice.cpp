@@ -1,6 +1,7 @@
 #include "Dice.h"
-#include <stdlib.h>
+#include <cstdlib> 
 #include <iostream>
+#include <ctime> 
 
 
 
@@ -9,6 +10,7 @@ Dice::Dice() {
 }
 
 int Dice::roll() {
+    srand(time(0)); // Seed the random number generator with the current time
     value = rand() % 6 + 1;
     return value;
 }

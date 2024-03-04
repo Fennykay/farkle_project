@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
 #include "Dice.h"
 #include "Player.h"
 #include "GameRunner.h"
@@ -30,25 +31,30 @@ void printDice(std::vector<Dice>& dice) {
 
 std::vector<Dice>& pickDiceToKeep(std::vector<Dice>& dice, Player& player) {
     bool keepPicking = true;
-    vector<Dice> diceToKeep;
+    std::vector<Dice> diceToKeep;
     std::string input;
     while (keepPicking) {
         int diceChoice;
 
         printDice(dice);
+        
         std::cout << "Which dice would you like to keep? (1-6): ";
         std::cin >> diceChoice;
-        if (diceChoice < 1 || diceChoice > dice.size()-1) {
-            std::cout << "Invalid choice. Please try again." << std::endl;
-            continue;
-        } 
-        diceToKeep.push_back(dice[diceChoice - 1]);
-        dice.erase(dice.begin() + diceChoice - 1);
-        
-        std::cout << "Would you like to keep more dice? (y/n): ";
-        std:: cin >> input;
-        if (input == "n") {
-            keepPicking = false;
+        try {
+            if (diceChoice < 1 || diceChoice > dice.size()) {
+                throw std::out_of_range("Invalid choice. Please try again.");
+            }
+            diceToKeep.push_back(dice[diceChoice - 1]);
+            dice.erase(dice.begin() + diceChoice - 1);
+
+            std::cout << "Would you like to keep more dice? (y/n): ";
+            std::cin >> input;
+            if (input == "n") {
+                keepPicking = false;
+                player.saveDice(diceToKeep);
+            }
+        } catch (const std::exception& e) {
+            std::cout << "Error: " << e.what() << std::endl;
         }
     }
     return dice;
@@ -57,11 +63,9 @@ std::vector<Dice>& pickDiceToKeep(std::vector<Dice>& dice, Player& player) {
 
 
 
-
 int main() {
     GameRunner gameRunner;
     bool play = true;
-    int diceChoice;
     std::string input;
     std::vector<Dice> diceSet = {Dice(), Dice(), Dice(), Dice(), Dice(), Dice()};
 
@@ -80,16 +84,8 @@ int main() {
             play = false;
         }
 
-        for (vector<Dice> d : players[0].getSavedDice()) {
-            for (Dice die : d) {
-                std::cout << die.getValue() << " ";
-            }
-        }
-
-        for (vector<Dice> d : players[0].getSavedDice()) {
-            gameRunner.addScore(gameRunner.computeScore(d));
-            cout << 
-        }
+        players[0].displaySavedDice();
+        std::cout << gameRunner.computeScore(players[0].getSavedDice()[0]);
     }
     return 0;
 }

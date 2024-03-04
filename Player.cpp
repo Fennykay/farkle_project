@@ -59,3 +59,7 @@ int Player::combineScores() {
 int Player::getScore() {
     return score;
 }
+
+void Player::setScore(int score) {
+    this->score = score;
+}
