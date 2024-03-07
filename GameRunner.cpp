@@ -53,3 +53,7 @@ int GameRunner::computeScore(std::vector<Dice> dice) {
     return score;
 }
 
+void GameRunner::gamePlayLoop(std::vector<Player>& players, std::vector<Dice>& dice) {
+    
+}
+

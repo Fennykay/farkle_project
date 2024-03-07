@@ -12,6 +12,7 @@ public:
     int getScore(Player player);
     void addScore(int score, Player player);
     void resetScore(Player player);
+    void gamePlayLoop(std::vector<Player>& players, std::vector<Dice>& dice);
 
 private:
     Player player;
