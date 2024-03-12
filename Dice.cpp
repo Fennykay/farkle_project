@@ -1,16 +1,18 @@
 #include "Dice.h"
-#include <cstdlib> 
-#include <ctime> 
+#include <chrono>
+#include <random>
 
 
 
-Dice::Dice() {
-    value = 1;
+
+std::mt19937 Dice::rng{static_cast<unsigned>(std::chrono::steady_clock::now().time_since_epoch().count())};
+
+Dice::Dice() : dist(1, 6) {
+    this->value = 1;
 }
 
 int Dice::roll() {
-    srand(time(0)); // Seed the random number generator with the current time
-    value = rand() % 6 + 1;
+    value = dist(rng);
     return value;
 }
 
