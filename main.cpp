@@ -17,7 +17,7 @@ std::vector<Player> initPlayers() {
         std::string name;
         std::cout << "Enter the name of player " << i + 1 << ": ";
         std::cin >> name;
-        players.push_back(Player(name));
+        players.emplace_back(Player(name));
     }
     return players;
 }
@@ -72,8 +72,9 @@ int main() {
     std::vector<Player> players = initPlayers();
 
     while (play) {
-        for (Dice& d : diceSet) {
+        for (Dice d : diceSet) {
             d.roll();
+            std::cout << d.getValue() << " " << std::endl;
         }
         diceSet = pickDiceToKeep(diceSet, players[0]);
 

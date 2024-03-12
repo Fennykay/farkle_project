@@ -1,6 +1,5 @@
 #include "Dice.h"
 #include <cstdlib> 
-#include <iostream>
 #include <ctime> 
 
 
