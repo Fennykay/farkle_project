@@ -8,15 +8,16 @@
 class GameRunner
 {
 public:
-    int computeScore(std::vector<Dice> dice);
+    
     int getScore(Player player);
     void addScore(int score, Player player);
     void resetScore(Player player);
     void gamePlayLoop(std::vector<Player>& players, std::vector<Dice>& dice);
-
+	int computeHandScore(std::vector<std::vector<Dice>>& dice);
 private:
     Player player;
     bool isWinner(Player player);
+    int computeScore(const std::vector<Dice>& dice);
 };
 
 

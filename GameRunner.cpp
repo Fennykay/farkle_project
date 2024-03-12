@@ -10,7 +10,7 @@ int GameRunner::getScore(Player player) {
 }
 
 void GameRunner::addScore(int score, Player player) {
-    score += score;
+    player.addTempScore(score);
 }
 
 void GameRunner::resetScore(Player player) {
@@ -21,7 +21,17 @@ bool GameRunner::isWinner(Player player) {
     return player.getScore() >= 10000;
 }
 
-int GameRunner::computeScore(std::vector<Dice> dice) {
+int GameRunner::computeHandScore(std::vector<std::vector<Dice>>& dice)
+{
+    int scoreHolder = 0;
+    for (std::vector<Dice>& d : dice)
+    {
+	    scoreHolder += computeScore(d);
+    }
+    return scoreHolder;
+}
+
+int GameRunner::computeScore(const std::vector<Dice>& dice) {
     int score = 0;
     std::vector<int> counts(6, 0);
     for (Dice d : dice) {

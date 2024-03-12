@@ -23,13 +23,13 @@ std::vector<Player> initPlayers() {
         std::string name;
         std::cout << "Enter the name of player " << i + 1 << ": ";
         std::cin >> name;
-        players.push_back(Player(name));
+        players.emplace_back(name);
     }
     return players;
 }
 
 // Function to print the values of the dice
-void printDice(std::vector<Dice>& dice) {
+void printDice(const std::vector<Dice>& dice) {
     for (Dice d : dice) {
         std::cout << d.getValue() << " ";
     }
@@ -90,6 +90,8 @@ int main() {
 
     std::vector<Player> players = initPlayers();
 
+    std::vector<std::vector<Dice>> current_dice_holder;
+
     while (play) {
         // Roll the dice
         for (Dice& d : diceSet) {
@@ -107,7 +109,10 @@ int main() {
 
         // Display the saved dice for the first player
         players[0].displaySavedDice();
+        current_dice_holder = players[0].getSavedDice();
     }
-    std::cout << gameRunner.computeScore(players[0].getSavedDice()[0]) << std::endl;
+
+    std::cout << gameRunner.computeHandScore(current_dice_holder) << std::endl;
+
     return 0;
 }
