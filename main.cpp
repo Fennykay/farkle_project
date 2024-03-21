@@ -40,7 +40,6 @@ void printDice(std::vector<Dice>& dice) {
 // Function to pick dice to keep
 std::vector<Dice>& pickDiceToKeep(std::vector<Dice>& dice, Player& player) {
 
-
     bool keepPicking = true;
     std::vector<Dice> diceToKeep;
     std::string input;
@@ -48,6 +47,7 @@ std::vector<Dice>& pickDiceToKeep(std::vector<Dice>& dice, Player& player) {
     while (keepPicking) {
         std::string diceChoice;
         int temp;
+        std::vector<int> indicesToKeep;
 
         printDice(dice);
         std::cout << "Would you like to keep any dice? (y/n): ";
@@ -73,10 +73,21 @@ std::vector<Dice>& pickDiceToKeep(std::vector<Dice>& dice, Player& player) {
                     throw std::out_of_range("Invalid choice. Please try again.");
                 }
                 else {
-                    diceToKeep.push_back(dice[temp - 1]);
-                    dice.erase(dice.begin() + temp - 1);
+                    indicesToKeep.push_back(temp - 1);
                 }
             }
+
+            // Add the selected dice to diceToKeep and remove them from the dice vector
+            for (int index : indicesToKeep) {
+                diceToKeep.push_back(dice[index]);
+            }
+            // Sort indices in descending order to avoid changing indices during removal
+            std::sort(indicesToKeep.begin(), indicesToKeep.end(), std::greater<int>());
+            // Remove the selected dice from the dice vector
+            for (int index : indicesToKeep) {
+                dice.erase(dice.begin() + index);
+            }
+
             
             player.saveDice(diceToKeep);
             
