@@ -1,1 +1,14 @@
+<<<<<<< HEAD
 a.out
+=======
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/CppProperties.json
+/.vscode/settings.json
+/.vscode
+/a.out
+/a.exe
+>>>>>>> 2e93645e97b3fa64259e35a2e4ef2cebce713b4c

@@ -24,6 +24,7 @@ std::vector<Player> initPlayers() {
         std::string name;
         std::cout << "Enter the name of player " << i + 1 << ": ";
         std::cin >> name;
+        players.emplace_back(name);
         players.emplace_back(name); // Emplace instead of push_back
     }
     return players;
