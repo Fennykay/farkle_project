@@ -38,7 +38,7 @@ void print_dice(std::vector<Dice>& dice) {
 }
 
 // Function to pick dice to keep
-std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player) {
+std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player, GameRunner gameRunner) {
 
     bool keepPicking = true;
     std::vector<Dice> diceToKeep;
@@ -90,6 +90,7 @@ std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player) {
 
             
             player.saveDice(diceToKeep);
+            diceToKeep.clear(); // Clear the diceToKeep vector
             
         } catch (const std::exception& e) {
             std::cout << "Error: " << e.what() << std::endl;
@@ -107,9 +108,12 @@ std::vector<Dice> init_dice() {
 }
 
 int main() {
-	std::vector<Dice> diceSet;
-    std::string input;
-    int player_iterator = 0;
+
+    const int SCORE_TO_WIN = 10000; // Score to win the game
+    GameRunner gameRunner; // Create a game runner object
+    std::vector<Dice> diceSet = initDice(); // Initialize the dice set
+    char input; 
+    int playerIterator = 0; // Iterator to keep track of the current player
 
     std::vector<Player> players = init_players();
     if (players.empty()) return 1; // Exit if no players
@@ -121,23 +125,40 @@ int main() {
         diceSet = init_dice();
         // Roll the dice
         for (auto& d : diceSet) {
-            d.roll();
+            d.roll(); // Roll the dice
         }
         // Pick dice to keep for the player
-        pick_dice_to_keep(diceSet, active_player);
+        pick_dice_to_keep(diceSet, active_player, gameRunner); 
 
         std::cout << "Do you want to roll again? (y/n): ";
         std::cin >> input;
 
-        if (input == "n") {
-            player_iterator = (player_iterator + 1) % players.size(); // Move to the next player
-            active_player = players[player_iterator];
-            cout << active_player.getName() << ", it is your turn" << endl;
+        if (input == 'n') {
+            activePlayer.displaySavedDice(); // Display the saved dice
+            gameRunner.addScore(gameRunner.computeHandScore(activePlayer.getSavedDice()), activePlayer); // Add the score to the player
+            activePlayer.resetSavedDice(); // Clear the saved dice
+            activePlayer.combineScores(); // Combine the scores
+            activePlayer.resetTempScore(); // Reset the temporary 
+            
+            if (gameRunner.isWinner(activePlayer)) {
+                std::cout << activePlayer.getName() << " has won the game!" << std::endl;
+                play = false; // End the game
+                break;
+            }
+
+            playerIterator = (playerIterator + 1) % players.size(); // Move to the next player
+            activePlayer = players[playerIterator]; // Set the active player
+
+            cout << activePlayer.getName() << ", it is your turn" << endl; 
+            cout << activePlayer.getName() << ", your score is " << activePlayer.getScore() << endl;
+            diceSet = initDice(); // Reset the dice set
         }
     }
 
     try
     {
+        for (auto& player : players) {
+            cout << player.getName() << endl;
 	    GameRunner game_runner;
 	    for (auto& player : players) {
             std::cout << player.getName() << " score: " << game_runner.computeScore(player.getSavedDice()[0]) << std::endl;

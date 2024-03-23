@@ -21,10 +21,10 @@ bool GameRunner::isWinner(Player player) {
     return player.getScore() >= 10000;
 }
 
-int GameRunner::computeHandScore(std::vector<std::vector<Dice>>& dice)
+int GameRunner::computeHandScore(const std::vector<std::vector<Dice>>& dice)
 {
     int scoreHolder = 0;
-    for (std::vector<Dice>& d : dice)
+    for (std::vector<Dice> d : dice)
     {
 	    scoreHolder += computeScore(d);
     }
@@ -62,8 +62,3 @@ int GameRunner::computeScore(const std::vector<Dice>& dice) {
     }
     return score;
 }
-
-void GameRunner::gamePlayLoop(std::vector<Player>& players, std::vector<Dice>& dice) {
-    
-}
-
