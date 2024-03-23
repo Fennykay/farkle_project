@@ -8,19 +8,19 @@
 #include "Player.h"
 #include "GameRunner.h"
 
-std::vector<Player> initPlayers() {
-    int numberOfPlayers;
+std::vector<Player> init_players() {
+    int number_of_players;
     std::cout << "How many players are there? ";
-    std::cin >> numberOfPlayers;
+    std::cin >> number_of_players;
 
-    if (numberOfPlayers < 2) {
+    if (number_of_players < 2) {
         std::cerr << "Error: At least 2 players are required." << std::endl;
         return {}; // Return an empty vector
     }
 
     std::vector<Player> players;
-    players.reserve(numberOfPlayers); // Reserve memory for players
-    for (int i = 0; i < numberOfPlayers; i++) {
+    players.reserve(number_of_players); // Reserve memory for players
+    for (int i = 0; i < number_of_players; i++) {
         std::string name;
         std::cout << "Enter the name of player " << i + 1 << ": ";
         std::cin >> name;
@@ -30,7 +30,7 @@ std::vector<Player> initPlayers() {
 }
 
 // Function to print the values of the dice
-void printDice(std::vector<Dice>& dice) {
+void print_dice(std::vector<Dice>& dice) {
     for (Dice& d : dice) {
         std::cout << d.getValue() << " ";
     }
@@ -38,7 +38,7 @@ void printDice(std::vector<Dice>& dice) {
 }
 
 // Function to pick dice to keep
-std::vector<Dice>& pickDiceToKeep(std::vector<Dice>& dice, Player& player) {
+std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player) {
 
     bool keepPicking = true;
     std::vector<Dice> diceToKeep;
@@ -49,7 +49,7 @@ std::vector<Dice>& pickDiceToKeep(std::vector<Dice>& dice, Player& player) {
         int temp;
         std::vector<int> indicesToKeep;
 
-        printDice(dice);
+        print_dice(dice);
         std::cout << "Would you like to keep any dice? (y/n): ";
         std::cin >> input;
 
@@ -101,47 +101,46 @@ std::vector<Dice>& pickDiceToKeep(std::vector<Dice>& dice, Player& player) {
     return dice;
 }
 
-std::vector<Dice> initDice() {
-    std::vector<Dice> diceSet(6);
-    return diceSet;
+std::vector<Dice> init_dice() {
+    std::vector<Dice> dice_set(6);
+    return dice_set;
 }
 
 int main() {
-    GameRunner gameRunner;
-    std::vector<Dice> diceSet;
+	std::vector<Dice> diceSet;
     std::string input;
-    int playerIterator = 0;
+    int player_iterator = 0;
 
-    std::vector<Player> players = initPlayers();
+    std::vector<Player> players = init_players();
     if (players.empty()) return 1; // Exit if no players
 
-    Player activePlayer = players[playerIterator]; 
+    Player active_player = players[player_iterator]; 
     bool play = true;
 
     while (play) {
-        diceSet = initDice();
+        diceSet = init_dice();
         // Roll the dice
         for (auto& d : diceSet) {
             d.roll();
         }
         // Pick dice to keep for the player
-        pickDiceToKeep(diceSet, activePlayer);
+        pick_dice_to_keep(diceSet, active_player);
 
         std::cout << "Do you want to roll again? (y/n): ";
         std::cin >> input;
 
         if (input == "n") {
-            activePlayer.displaySavedDice();
-            playerIterator = (playerIterator + 1) % players.size(); // Move to the next player
-            activePlayer = players[playerIterator];
-            cout << activePlayer.getName() << ", it is your turn" << endl;
+            player_iterator = (player_iterator + 1) % players.size(); // Move to the next player
+            active_player = players[player_iterator];
+            cout << active_player.getName() << ", it is your turn" << endl;
         }
     }
 
     try
     {
-        for (auto& player : players) {
-            std::cout << player.getName() << " score: " << gameRunner.computeScore(player.getSavedDice()[0]) << std::endl;
+	    GameRunner game_runner;
+	    for (auto& player : players) {
+            std::cout << player.getName() << " score: " << game_runner.computeScore(player.getSavedDice()[0]) << std::endl;
             }
     }
     catch(const std::exception& e)
