@@ -122,7 +122,6 @@ int main() {
     bool play = true;
 
     while (play) {
-        diceSet = init_dice();
         // Roll the dice
         for (auto& d : diceSet) {
             d.roll(); // Roll the dice
@@ -135,10 +134,11 @@ int main() {
 
         if (input == 'n') {
             active_player.displaySavedDice(); // Display the saved dice
-            gameRunner.addScore(gameRunner.computeHandScore(active_player.getSavedDice()), active_player); // Add the score to the player
-            active_player.resetSavedDice(); // Clear the saved dice
-            active_player.combineScores(); // Combine the scores
-            active_player.resetTempScore(); // Reset the temporary 
+            cout << "Score: " << gameRunner.computeHandScore(active_player.getSavedDice()) << endl;
+            //gameRunner.addScore(gameRunner.computeHandScore(active_player.getSavedDice()), active_player); // Add the score to the player
+            //active_player.resetSavedDice(); // Clear the saved dice
+            //active_player.combineScores(); // Combine the scores
+            //active_player.resetTempScore(); // Reset the temporary 
             
             if (gameRunner.isWinner(active_player)) {
                 std::cout << active_player.getName() << " has won the game!" << std::endl;
@@ -158,17 +158,12 @@ int main() {
     try
     {
         for (auto& player : players) {
-            cout << player.getName() << endl;
             GameRunner game_runner;
-            for (auto& player : players) {
-                std::cout << player.getName() << " score: " << game_runner.computeHandScore(player.getSavedDice()) << std::endl;
-            }
+            cout << "Player: " << player.getName() << endl;
         }
     }
     catch (const std::exception& e)
     {
         std::cerr << e.what() << '\n';
     }
-
-    return 0;
 }

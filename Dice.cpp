@@ -16,6 +16,6 @@ int Dice::roll() {
     return value;
 }
 
-int Dice::getValue() {
+int Dice::getValue() const {
     return value;
 }

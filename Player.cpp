@@ -7,10 +7,12 @@
 using namespace std;
 
 
-Player::Player() {
-    name = "Player";
+Player::Player(): score(0), tempScore(0)
+{
+	name = "Player";
 }
-Player::Player(std::string name) {
+
+Player::Player(std::string name): score(0), tempScore(0) {
     this->name = name;
 }
 
