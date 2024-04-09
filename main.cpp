@@ -127,41 +127,44 @@ int main() {
     std::vector<Player> players = init_players();
     if (players.empty()) return 1; // Exit if no players
 
-    Player* player_pointer = &players[player_iterator]; 
-    Player& active_player = *player_pointer; // Set the active player
+    auto active_player = players.begin(); // Set the active player to the first player
 
     bool play = true;
 
     while (play) {
+        Player& player = *active_player;
         // Roll the dice
         for (auto& d : diceSet) {
             d.roll(); // Roll the dice
         }
+
+        cout << player.getName() << ", it is your turn" << endl; 
+        cout << player.getName() << ", your score is " << player.getScore() << endl;
+        
         // Pick dice to keep for the player
-        pick_dice_to_keep(diceSet, active_player, gameRunner); 
+        pick_dice_to_keep(diceSet, player, gameRunner); 
 
         std::cout << "Do you want to roll again? (y/n): ";
         std::cin >> input;
 
         if (input == 'n') {
-            active_player.addTempScore(gameRunner.computeHandScore(active_player.getSavedDice())); // Add the score to the temporary score
-            active_player.displaySavedDice(); // Display the saved dice           
-            active_player.resetSavedDice(); // Clear the saved dice
-            active_player.combineScores(); // Combine the scores
-            active_player.resetTempScore(); // Reset the temporary 
+            player.addTempScore(gameRunner.computeHandScore(player.getSavedDice())); // Add the score to the temporary score
+            player.displaySavedDice(); // Display the saved dice           
+            player.resetSavedDice(); // Clear the saved dice
+            player.combineScores(); // Combine the scores
+            player.resetTempScore(); // Reset the temporary 
             
-            if (gameRunner.isWinner(active_player)) {
-                std::cout << active_player.getName() << " has won the game!" << std::endl;
+            if (gameRunner.isWinner(player)) {
+                std::cout << player.getName() << " has won the game!" << std::endl;
                 play = false; // End the game
                 break;
             }
 
-            player_iterator = (player_iterator + 1) % players.size(); // Move to the next player
-            player_pointer = &players[player_iterator]; // Set the player pointer to the next player
-            active_player = *player_pointer; // Set the active player to the next player
-
-            cout << active_player.getName() << ", it is your turn" << endl; 
-            cout << active_player.getName() << ", your score is " << active_player.getScore() << endl;
+            active_player++; // Move to the next player
+            if (active_player == players.end()) {
+                active_player = players.begin(); // Reset the iterator
+            }
+            
             diceSet = init_dice(); // Reset the dice set
         }
 

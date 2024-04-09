@@ -29,7 +29,7 @@ int GameRunner::computeHandScore(const std::vector<std::vector<Dice>>& dice)
     {
         if (d.size() == 0)
         {
-			break;
+			continue;
         }
         else {
 	    scoreHolder += computeScore(d);
