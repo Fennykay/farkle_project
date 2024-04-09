@@ -23,8 +23,8 @@ public:
 
     void addTempScore(int score);  // Add to the temporary score
     void resetTempScore();  // Reset the temporary score
-    int combineScores();  // Combine the temporary score with the score
-    int getScore();  // Get the score of the player
+    void combineScores();  // Combine the temporary score with the score
+    int getScore() const;  // Get the score of the player
     void setScore(int score);  // Set the score of the player
 
 

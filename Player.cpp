@@ -53,12 +53,11 @@ void Player::resetTempScore() {
     tempScore = 0;
 }
 
-int Player::combineScores() {
-    score += tempScore;
-    return score;
+void Player::combineScores() {
+    this->score += tempScore;
 }
 
-int Player::getScore() {
+int Player::getScore() const {
     return score;
 }
 

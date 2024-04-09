@@ -8,8 +8,13 @@
 #include "Player.h"
 #include "GameRunner.h"
 
+
+const int SCORE_TO_ENTER = 1000; // Score to enter the game
+
 std::vector<Player> init_players() {
+
     int number_of_players;
+
     std::cout << "How many players are there? ";
     std::cin >> number_of_players;
 
@@ -19,12 +24,16 @@ std::vector<Player> init_players() {
     }
 
     std::vector<Player> players;
+
     players.reserve(number_of_players); // Reserve memory for players
     for (int i = 0; i < number_of_players; i++) {
         std::string name;
+
         std::cout << "Enter the name of player " << i + 1 << ": ";
         std::cin >> name;
-        players.emplace_back(name); // Emplace instead of push_back
+
+        Player player(name);
+        players.emplace_back(player); // Emplace instead of push_back
     }
     return players;
 }
@@ -118,7 +127,9 @@ int main() {
     std::vector<Player> players = init_players();
     if (players.empty()) return 1; // Exit if no players
 
-    Player active_player = players[player_iterator]; 
+    Player* player_pointer = &players[player_iterator]; 
+    Player& active_player = *player_pointer; // Set the active player
+
     bool play = true;
 
     while (play) {
@@ -133,12 +144,11 @@ int main() {
         std::cin >> input;
 
         if (input == 'n') {
-            active_player.displaySavedDice(); // Display the saved dice
-            cout << "Score: " << gameRunner.computeHandScore(active_player.getSavedDice()) << endl;
-            //gameRunner.addScore(gameRunner.computeHandScore(active_player.getSavedDice()), active_player); // Add the score to the player
-            //active_player.resetSavedDice(); // Clear the saved dice
-            //active_player.combineScores(); // Combine the scores
-            //active_player.resetTempScore(); // Reset the temporary 
+            active_player.addTempScore(gameRunner.computeHandScore(active_player.getSavedDice())); // Add the score to the temporary score
+            active_player.displaySavedDice(); // Display the saved dice           
+            active_player.resetSavedDice(); // Clear the saved dice
+            active_player.combineScores(); // Combine the scores
+            active_player.resetTempScore(); // Reset the temporary 
             
             if (gameRunner.isWinner(active_player)) {
                 std::cout << active_player.getName() << " has won the game!" << std::endl;
@@ -147,23 +157,14 @@ int main() {
             }
 
             player_iterator = (player_iterator + 1) % players.size(); // Move to the next player
-            active_player = players[player_iterator]; // Set the active player
+            player_pointer = &players[player_iterator]; // Set the player pointer to the next player
+            active_player = *player_pointer; // Set the active player to the next player
 
             cout << active_player.getName() << ", it is your turn" << endl; 
             cout << active_player.getName() << ", your score is " << active_player.getScore() << endl;
             diceSet = init_dice(); // Reset the dice set
         }
+
     }
 
-    try
-    {
-        for (auto& player : players) {
-            GameRunner game_runner;
-            cout << "Player: " << player.getName() << endl;
-        }
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
 }
