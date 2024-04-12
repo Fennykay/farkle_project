@@ -117,6 +117,12 @@ std::vector<Dice> init_dice() {
     return dice_set;
 }
 
+std::vector<Dice> roll_dice(std::vector<Dice>& dice) {
+    for (Dice& d : dice) {
+        d.roll();
+    }
+    return dice;
+}
 void entry_game_round(Player& player, GameRunner gamerunner, std::vector<Dice>& dice) {
     char input;
 
@@ -175,13 +181,12 @@ int main() {
     auto active_player = players.begin(); // Set the active player to the first player
 
     bool play = true;
+    bool playerTurn = true;
 
     while (play) {
         Player& player = *active_player;
         // Roll the dice
-        for (auto& d : diceSet) {
-            d.roll(); // Roll the dice
-        }
+        roll_dice(diceSet);
 
         if (player.getPassedEntryScore() == true) {
 
@@ -207,24 +212,31 @@ int main() {
                 diceSet = init_dice();
             }
         } else {
-            gameRunner.displayMenu(player); // Display the player's menu
-            pick_dice_to_keep(diceSet, player, gameRunner); // Pick dice to keep for the player
+            while (playerTurn == true) {
+                gameRunner.displayMenu(player); // Display the player's menu
+                pick_dice_to_keep(diceSet, player, gameRunner); // Pick dice to keep for the player
 
-            std::cout << "Do you want to roll again? (y/n): ";
-            std::cin >> input;
+                std::cout << "Do you want to roll again? (y/n): ";
+                std::cin >> input;
 
-            if (input == 'n') {
-                processPlayerTurn(player, gameRunner, diceSet, players);
-            }
-            if (player.getScore() >= SCORE_TO_ENTER) {
-                player.reachedEntryScore();
-                std::cout << player.getName() << " has entered the game!" << std::endl;
+                if (input == 'n') {
+                    processPlayerTurn(player, gameRunner, diceSet, players);
+                    playerTurn = false;
 
-                player.setScore(0);
-            }
-            else {
-                std::cout << player.getName() << " has not reached the score threshold." << std::endl;
-                player.setScore(0);
+                    if (player.getScore() >= SCORE_TO_ENTER) {
+                        player.reachedEntryScore();
+                        std::cout << player.getName() << " has entered the game!" << std::endl;
+
+                        player.setScore(0);
+                        break;
+                    }
+                    else {
+                        std::cout << player.getName() << " has not reached the score threshold." << std::endl;
+                        player.setScore(0);
+                        break;
+                    }
+                }
+                roll_dice(diceSet);
             }
             // Move to the next player
             active_player++;
