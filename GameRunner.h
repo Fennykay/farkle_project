@@ -12,9 +12,15 @@ public:
     int getScore(Player player);
     void addScore(int score, Player player);
     void resetScore(Player player);
-    void gamePlayLoop(std::vector<Player>& players, std::vector<Dice>& dice);
+
     int computeHandScore(const std::vector<std::vector<Dice>>& dice);
+
     bool isWinner(Player player);
+
+    void displayMenu(Player player);
+    void displayRules();
+    void displayWinner(Player player);
+
 private:
     Player player;
     int computeScore(const std::vector<Dice>& dice);

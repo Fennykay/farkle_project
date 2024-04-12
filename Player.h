@@ -27,12 +27,16 @@ public:
     int getScore() const;  // Get the score of the player
     void setScore(int score);  // Set the score of the player
 
+    void reachedEntryScore();
+    bool getPassedEntryScore();
+
 
     private:
     string name;  // Name of the player
     vector<std::vector<Dice>> savedDice;  // Array of saved dice
     int score;
     int tempScore;
+    bool Passed_entry_score;
 };
 
 

@@ -10,6 +10,7 @@
 
 
 const int SCORE_TO_ENTER = 1000; // Score to enter the game
+const int SCORE_TO_WIN = 10000; // Score to win the game
 
 std::vector<Player> init_players() {
 
@@ -116,13 +117,57 @@ std::vector<Dice> init_dice() {
     return dice_set;
 }
 
+void entry_game_round(Player& player, GameRunner gamerunner, std::vector<Dice>& dice) {
+    char input;
+
+    cout << player.getName() << ", it is your turn" << endl;
+
+    pick_dice_to_keep(dice, player, gamerunner);
+
+    std::cout << "Do you want to roll again? (y/n): ";
+    std::cin >> input;
+
+    if (input == 'n') {
+        player.addTempScore(gamerunner.computeHandScore(player.getSavedDice())); // Add the score to the temporary score
+        player.displaySavedDice(); // Display the saved dice           
+        player.resetSavedDice(); // Clear the saved dice
+        player.combineScores(); // Combine the scores
+        player.resetTempScore(); // Reset the temporary
+
+        if (player.getScore() >= SCORE_TO_ENTER) {
+            player.reachedEntryScore();
+
+            std::cout << player.getName() << " has entered the game!" << std::endl;
+        }
+        else {
+            std::cout << player.getName() << " has not reached the score threshold." << std::endl;
+        }
+    }
+}
+
+void processPlayerTurn(Player& player, GameRunner& gameRunner, std::vector<Dice>& diceSet, std::vector<Player> players) {
+    player.addTempScore(gameRunner.computeHandScore(player.getSavedDice())); // Add the score to the temporary score
+    player.displaySavedDice(); // Display the saved dice           
+    player.resetSavedDice(); // Clear the saved dice
+    player.combineScores(); // Combine the scores
+    player.resetTempScore(); // Reset the temporary 
+
+    if (gameRunner.isWinner(player)) {
+        std::cout << player.getName() << " has won the game!" << std::endl;
+        return; // End the game
+    }
+}
+
+
+
+// TODO: FIX ENTRY GAME ROUND FUNCTION, YOU NEED TO FIX THE USERS ROLLING SEVERAL TIMES IN ONE TURN
+// ALSO LOOK INTO SEPARATING CODE INTO FUNCTIONS, MAIN IS LOOKING BIG
 int main() {
 
-    const int SCORE_TO_WIN = 10000; // Score to win the game
+
     GameRunner gameRunner; // Create a game runner object
     std::vector<Dice> diceSet = init_dice(); // Initialize the dice set
-    char input; 
-    int player_iterator = 0; // Iterator to keep track of the current player
+    char input;
 
     std::vector<Player> players = init_players();
     if (players.empty()) return 1; // Exit if no players
@@ -138,36 +183,54 @@ int main() {
             d.roll(); // Roll the dice
         }
 
-        cout << player.getName() << ", it is your turn" << endl; 
-        cout << player.getName() << ", your score is " << player.getScore() << endl;
-        
-        // Pick dice to keep for the player
-        pick_dice_to_keep(diceSet, player, gameRunner); 
+        if (player.getPassedEntryScore() == true) {
 
-        std::cout << "Do you want to roll again? (y/n): ";
-        std::cin >> input;
+            gameRunner.displayMenu(player); // Display the player's menu
 
-        if (input == 'n') {
-            player.addTempScore(gameRunner.computeHandScore(player.getSavedDice())); // Add the score to the temporary score
-            player.displaySavedDice(); // Display the saved dice           
-            player.resetSavedDice(); // Clear the saved dice
-            player.combineScores(); // Combine the scores
-            player.resetTempScore(); // Reset the temporary 
-            
-            if (gameRunner.isWinner(player)) {
-                std::cout << player.getName() << " has won the game!" << std::endl;
-                play = false; // End the game
-                break;
+            // Pick dice to keep for the player
+            pick_dice_to_keep(diceSet, player, gameRunner);
+
+            std::cout << "Do you want to roll again? (y/n): ";
+            std::cin >> input;
+
+            if (input == 'n') {
+                // Function to process the player's turn
+                processPlayerTurn(player, gameRunner, diceSet, players);
+
+                // Move to the next player
+                active_player++;
+                if (active_player == players.end()) {
+                    active_player = players.begin(); // Reset the iterator
+                }
+
+                // Reset the dice set
+                diceSet = init_dice();
             }
+        } else {
+            gameRunner.displayMenu(player); // Display the player's menu
+            pick_dice_to_keep(diceSet, player, gameRunner); // Pick dice to keep for the player
 
-            active_player++; // Move to the next player
+            std::cout << "Do you want to roll again? (y/n): ";
+            std::cin >> input;
+
+            if (input == 'n') {
+                processPlayerTurn(player, gameRunner, diceSet, players);
+            }
+            if (player.getScore() >= SCORE_TO_ENTER) {
+                player.reachedEntryScore();
+                std::cout << player.getName() << " has entered the game!" << std::endl;
+
+                player.setScore(0);
+            }
+            else {
+                std::cout << player.getName() << " has not reached the score threshold." << std::endl;
+                player.setScore(0);
+            }
+            // Move to the next player
+            active_player++;
             if (active_player == players.end()) {
                 active_player = players.begin(); // Reset the iterator
             }
-            
-            diceSet = init_dice(); // Reset the dice set
         }
-
     }
-
 }

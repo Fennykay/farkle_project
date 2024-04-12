@@ -7,12 +7,11 @@
 using namespace std;
 
 
-Player::Player(): score(0), tempScore(0)
-{
-	name = "Player";
-}
+Player::Player(): score(0), tempScore(0), Passed_entry_score(false), name("Player")
+{}
 
-Player::Player(std::string name): score(0), tempScore(0) {
+Player::Player(std::string name): score(0), tempScore(0), Passed_entry_score(false)
+{
     this->name = name;
 }
 
@@ -20,20 +19,20 @@ void Player::setName(std::string name) {
     this->name = name;
 }
 std::string Player::getName() {
-    return name;
+    return this->name;
 }
 
 
 vector<vector<Dice>> Player::getSavedDice() {
-    return savedDice;
+    return this->savedDice;
 }
 
 void Player::saveDice(vector<Dice> d) {
-    savedDice.push_back(d);
+    this->savedDice.push_back(d);
 }
 
 void Player::resetSavedDice() {
-    savedDice.clear();
+    this->savedDice.clear();
 }
 
 void Player::displaySavedDice() {
@@ -46,11 +45,11 @@ void Player::displaySavedDice() {
 }
 
 void Player::addTempScore(int score) {
-    tempScore += score;
+    this->tempScore += score;
 }
 
 void Player::resetTempScore() {
-    tempScore = 0;
+    this->tempScore = 0;
 }
 
 void Player::combineScores() {
@@ -58,9 +57,18 @@ void Player::combineScores() {
 }
 
 int Player::getScore() const {
-    return score;
+    return this->score;
 }
 
 void Player::setScore(int score) {
     this->score = score;
+}
+
+void Player::reachedEntryScore() {
+	this->Passed_entry_score = true;
+}
+
+bool Player::getPassedEntryScore()
+{
+    return this->Passed_entry_score;
 }
