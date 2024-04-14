@@ -21,6 +21,8 @@ public:
     void displayRules();
     void displayWinner(Player player);
 
+    void runPlayerTurn(Player& player, std::vector<Dice> dice);
+
 private:
     Player player;
     int computeScore(const std::vector<Dice>& dice);

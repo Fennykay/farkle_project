@@ -32,6 +32,11 @@ void GameRunner::displayMenu(Player player)
 
 }
 
+void GameRunner::runPlayerTurn(Player& player, std::vector<Dice> dice)
+{
+
+}
+
 int GameRunner::computeHandScore(const std::vector<std::vector<Dice>>& dice)
 {
     int scoreHolder = 0;
