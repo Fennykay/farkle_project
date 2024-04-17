@@ -26,10 +26,9 @@ std::vector<Dice> roll_dice(std::vector<Dice>& dice);
 void processPlayerTurn(Player& player, GameRunner& gameRunner);
 void cycle_player_turn(std::vector<Player>& players, std::vector<Player>::iterator& activePlayer);
 void handle_entry_round(Player& player, GameRunner& gameRunner, std::vector<Dice>& diceSet, bool& playerTurn);
+void final_round(std::vector<Player>& players, GameRunner& gameRunner, std::vector<Dice>& diceSet);
 
 
-// TODO: FIX ENTRY GAME ROUND FUNCTION, YOU NEED TO FIX THE USERS ROLLING SEVERAL TIMES IN ONE TURN
-// ALSO LOOK INTO SEPARATING CODE INTO FUNCTIONS, MAIN IS LOOKING BIG
 int main() {
 
     GameRunner gameRunner; // Create a game runner object
@@ -43,6 +42,7 @@ int main() {
     char input;
 
     auto active_player = players.begin(); // Set the active player to the first player
+    gameRunner.displayIntroduction(); // Display the introduction
 
     while (play) {
         Player& player = *active_player;
@@ -62,6 +62,17 @@ int main() {
                 // Function to process the player's turn
                 processPlayerTurn(player, gameRunner);
 
+                if (player.getScore() >= SCORE_TO_WIN) {
+                    std::cout << "Congratulations " << player.getName() << "!" << std::endl;
+                    std::cout << "You have reached the winning score of 10000! We are now headed to the final round." << std::endl;
+
+                    gameRunner.setWinner(player);
+
+                    std::this_thread::sleep_for(chrono::seconds(5));
+                    play = false;
+                    continue;
+                }
+
                 // Move to the next player
                 cycle_player_turn(players, active_player);
 
@@ -69,10 +80,12 @@ int main() {
                 diceSet = init_dice();
                 system("CLS");
             }
-        } else {
+        } 
+        else {
             while (playerTurn == true) {
                 handle_entry_round(player, gameRunner, diceSet, playerTurn);
             }
+
             // Move to the next player
             cycle_player_turn(players, active_player);
 
@@ -81,6 +94,8 @@ int main() {
             system("CLS");
         }
     }
+
+    final_round(players, gameRunner, diceSet);
 }
 
 
@@ -193,6 +208,7 @@ std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player, Ga
 
             player.saveDice(diceToKeep);
             diceToKeep.clear(); // Clear the diceToKeep vector
+            system("CLS");
 
         }
         catch (const std::exception& e) {
@@ -223,11 +239,6 @@ void processPlayerTurn(Player& player, GameRunner& gameRunner) {
     player.resetSavedDice(); // Clear the saved dice
     player.combineScores(); // Combine the scores
     player.resetTempScore(); // Reset the temporary 
-
-    if (gameRunner.isWinner(player)) {
-        std::cout << player.getName() << " has won the game!" << std::endl;
-        return; // End the program
-    }
 }
 
 void cycle_player_turn(std::vector<Player>& players, std::vector<Player>::iterator& activePlayer) {
@@ -242,12 +253,6 @@ void handle_entry_round(Player& player, GameRunner& gameRunner, std::vector<Dice
     pick_dice_to_keep(diceSet, player, gameRunner); // Pick dice to keep for the player
     char input;
 
-    if (_kbhit()) {
-        // Check if Ctrl and . are pressed simultaneously
-        if (_getch() == 0x1B && _getch() == '.') { // 0x1B is ASCII code for Ctrl
-            cheat_enter_game(player);
-        }
-    }
 
     std::cout << "Do you want to roll again? (y/n): ";
     std::cin >> input;
@@ -287,4 +292,60 @@ void handle_entry_round(Player& player, GameRunner& gameRunner, std::vector<Dice
     std::this_thread::sleep_for(std::chrono::seconds(1));
     roll_dice(diceSet);
     system("CLS");
+}
+
+void final_round(std::vector<Player>& players, GameRunner& gameRunner, std::vector<Dice>& diceSet)
+{
+    bool play = true;
+    bool playerTurn = true;
+    char input;
+
+    diceSet = init_dice(); // Reset the dice set
+
+    auto active_player = players.begin(); // Set the active player to the first player
+
+    while (play) {
+
+        Player& player = *active_player;
+        // SKIP CURRENT WINNER TURN
+        if (gameRunner.getWinner().getName().compare(player.getName()) == 0) {
+            cycle_player_turn(players, active_player);
+            continue;
+        }
+
+        roll_dice(diceSet);
+
+        if (player.getPassedEntryScore() == true) {
+
+            gameRunner.displayMenu(player); // Display the player's menu
+
+            // Pick dice to keep for the player
+            pick_dice_to_keep(diceSet, player, gameRunner);
+
+            std::cout << "Do you want to roll again? (y/n): ";
+            std::cin >> input;
+
+            if (input == 'n') {
+                // Function to process the player's turn
+                processPlayerTurn(player, gameRunner);
+
+                if (player.getScore() > gameRunner.getWinner().getScore()) {
+					gameRunner.setWinner(player);
+				}
+
+                if (active_player == players.end() - 1) {
+					play = false;
+                }
+                // Move to the next player
+                cycle_player_turn(players, active_player);
+
+                // Reset the dice set
+                diceSet = init_dice();
+                system("CLS");
+            }
+
+        }
+    }
+
+    gameRunner.displayWinner(gameRunner.getWinner());
 }

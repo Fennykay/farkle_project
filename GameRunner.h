@@ -15,9 +15,11 @@ public:
 
     int computeHandScore(const std::vector<std::vector<Dice>>& dice);
 
-    bool isWinner(Player player);
+    Player getWinner();
+    void setWinner(Player player);
 
     void displayMenu(Player player);
+    void displayIntroduction();
     void displayRules();
     void displayWinner(Player player);
 
@@ -26,6 +28,8 @@ public:
 private:
     Player player;
     int computeScore(const std::vector<Dice>& dice);
+    Player Winner;
+    const string RULES_FILE = "FarkleRules.txt";
     
 };
 

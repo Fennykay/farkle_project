@@ -3,6 +3,8 @@
 #include <iostream>
 #include <unordered_map>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 
 
@@ -18,10 +20,6 @@ void GameRunner::resetScore(Player player) {
     player.setScore(0);
 }
 
-bool GameRunner::isWinner(Player player) {
-    return player.getScore() >= 10000;
-}
-
 void GameRunner::displayMenu(Player player)
 {
     int width = 30;
@@ -30,6 +28,37 @@ void GameRunner::displayMenu(Player player)
     std::cout << "| Score: " << std::setw(width - 6) << std::left << player.getScore() << " |" << std::endl;
     std::cout << "+---------------------------------+" << std::endl;
 
+}
+
+void GameRunner::displayIntroduction()
+{
+    std::cout << "Welcome to Farkle!" << std::endl;
+    std::cout << "The rules are simple: roll the dice and try to get the highest score possible." << std::endl;
+    std::cout << "Here are the rules:" << std::endl << std::endl;
+    displayRules();
+}
+
+void GameRunner::displayRules()
+{
+    // create a file stream object
+    std::fstream file(RULES_FILE);
+    // string for each line of the file
+    std::string line;
+    // string for the entire file
+    std::string rules;
+    // read the file line by line
+    while (std::getline(file, line))
+    {
+        rules += line + "\n";
+    }
+    std::cout << rules << std::endl;
+}
+
+void GameRunner::displayWinner(Player player)
+{
+    std::cout << "Congratulations " << player.getName() << "!" << std::endl;
+	std::cout << "You have won the game with a score of " << player.getScore() << "!" << std::endl;
+	std::cout << "Thanks for playing!" << std::endl;
 }
 
 void GameRunner::runPlayerTurn(Player& player, std::vector<Dice> dice)
@@ -52,6 +81,16 @@ int GameRunner::computeHandScore(const std::vector<std::vector<Dice>>& dice)
     }
 
     return scoreHolder;
+}
+
+Player GameRunner::getWinner()
+{
+    return Winner;
+}
+
+void GameRunner::setWinner(Player player)
+{
+    	Winner = player;
 }
 
 int GameRunner::computeScore(const std::vector<Dice>& dice) {
