@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <chrono>
 #include <thread>
-#include <conio.h>
 
 #include "Dice.h"
 #include "Player.h"
@@ -30,7 +29,6 @@ void final_round(std::vector<Player>& players, GameRunner& gameRunner, std::vect
 
 
 int main() {
-
     GameRunner gameRunner; // Create a game runner object
     std::vector<Dice> diceSet = init_dice(); // Initialize the dice set
 
@@ -54,6 +52,15 @@ int main() {
 
             // Pick dice to keep for the player
             pick_dice_to_keep(diceSet, player, gameRunner);
+
+            // TODO: #1 test hot dice functionality
+            if (diceSet.size() == 0) {
+                std::cout << "Hot Dice! You get to roll all 6 dice again." << std::endl;
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                diceSet = init_dice();
+                player.addTempScore(gameRunner.computeHandScore(player.getSavedDice())); // Add the score to the temporary score
+                continue;
+            }
 
             std::cout << "Do you want to roll again? (y/n): ";
             std::cin >> input;
