@@ -26,6 +26,8 @@ void processPlayerTurn(Player& player, GameRunner& gameRunner);
 void cycle_player_turn(std::vector<Player>& players, std::vector<Player>::iterator& activePlayer);
 void handle_entry_round(Player& player, GameRunner& gameRunner, std::vector<Dice>& diceSet, bool& playerTurn);
 void final_round(std::vector<Player>& players, GameRunner& gameRunner, std::vector<Dice>& diceSet);
+void clear_screen() {system("CLS");}
+bool check_for_farkle(std::vector<Dice>& dice, GameRunner& gameRunner);
 
 
 int main() {
@@ -85,7 +87,7 @@ int main() {
 
                 // Reset the dice set
                 diceSet = init_dice();
-                system("CLS");
+                clear_screen();
             }
         } 
         else {
@@ -98,7 +100,9 @@ int main() {
 
             playerTurn = true;
             diceSet = init_dice();
-            system("CLS");
+            roll_dice(diceSet);
+
+            clear_screen();
         }
     }
 
@@ -123,7 +127,7 @@ std::vector<Player> init_players() {
 
     std::cout << "How many players are there? ";
     std::cin >> number_of_players;
-    system("CLS");
+    clear_screen();
 
     if (number_of_players < 2) {
         std::cerr << "Error: At least 2 players are required." << std::endl;
@@ -141,7 +145,7 @@ std::vector<Player> init_players() {
 
         Player player(name);
         players.emplace_back(player); // Emplace instead of push_back
-        system("CLS");
+        clear_screen();
     }
     return players;
 }
@@ -170,10 +174,19 @@ std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player, Ga
         std::cout << "Would you like to keep any dice? (y/n): ";
         std::cin >> input;
 
+
+        //TODO: FIX FARKLE CHECK
         switch (input) {
         case 'n':
             keepPicking = false;
             player.saveDice(diceToKeep);
+
+            if (check_for_farkle(diceToKeep, gameRunner)) {
+				player.resetTempScore();
+				player.resetSavedDice();
+				return dice;
+			}
+
             return dice;
         case 'C':
             cheat_enter_game(player);
@@ -215,7 +228,7 @@ std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player, Ga
 
             player.saveDice(diceToKeep);
             diceToKeep.clear(); // Clear the diceToKeep vector
-            system("CLS");
+            clear_screen();
 
         }
         catch (const std::exception& e) {
@@ -258,6 +271,14 @@ void cycle_player_turn(std::vector<Player>& players, std::vector<Player>::iterat
 void handle_entry_round(Player& player, GameRunner& gameRunner, std::vector<Dice>& diceSet, bool& playerTurn) {
     gameRunner.displayMenu(player); // Display the player's menu
     pick_dice_to_keep(diceSet, player, gameRunner); // Pick dice to keep for the player
+
+    if (diceSet.size() == 0) {
+        std::cout << "Hot Dice! You get to roll all 6 dice again." << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        diceSet = init_dice();
+        player.addTempScore(gameRunner.computeHandScore(player.getSavedDice())); // Add the score to the temporary score
+        return;
+    }
     char input;
 
 
@@ -271,21 +292,21 @@ void handle_entry_round(Player& player, GameRunner& gameRunner, std::vector<Dice
 
         if (player.getScore() >= SCORE_TO_ENTER) {
             player.reachedEntryScore();
-            system("CLS");
+            clear_screen();
             std::cout << player.getName() << " has entered the game!" << std::endl;
 
             player.setScore(0);
 
             std::this_thread::sleep_for(std::chrono::seconds(2));
-            system("CLS");
+            clear_screen();
         }
         else {
-            system("CLS");
+            clear_screen();
             std::cout << player.getName() << " has not reached the score threshold." << std::endl;
             player.setScore(0);
 
             std::this_thread::sleep_for(std::chrono::seconds(2));
-            system("CLS");
+            clear_screen();
         }
         break;
     case 'C':
@@ -298,7 +319,7 @@ void handle_entry_round(Player& player, GameRunner& gameRunner, std::vector<Dice
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
     roll_dice(diceSet);
-    system("CLS");
+    clear_screen();
 }
 
 void final_round(std::vector<Player>& players, GameRunner& gameRunner, std::vector<Dice>& diceSet)
@@ -348,11 +369,20 @@ void final_round(std::vector<Player>& players, GameRunner& gameRunner, std::vect
 
                 // Reset the dice set
                 diceSet = init_dice();
-                system("CLS");
+                clear_screen();
             }
 
         }
     }
 
     gameRunner.displayWinner(gameRunner.getWinner());
+}
+
+bool check_for_farkle(std::vector<Dice>& dice, GameRunner& gameRunner)
+{
+    if (gameRunner.isFarkle(dice)) {
+		std::cout << "Farkle! You lose all points for this round." << std::endl;
+		return true;
+	}
+	return false;
 }
