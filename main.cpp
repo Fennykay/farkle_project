@@ -1,15 +1,15 @@
-#include <iostream>
-#include <string>
-#include <vector>
 #include <algorithm>
+#include <chrono>
+#include <iostream>
 #include <sstream>
 #include <stdlib.h>
-#include <chrono>
+#include <string>
 #include <thread>
+#include <vector>
 
 #include "Dice.h"
-#include "Player.h"
 #include "GameRunner.h"
+#include "Player.h"
 
 
 const int SCORE_TO_ENTER = 1000; // Score to enter the game
@@ -28,6 +28,7 @@ void handle_entry_round(Player& player, GameRunner& gameRunner, std::vector<Dice
 void final_round(std::vector<Player>& players, GameRunner& gameRunner, std::vector<Dice>& diceSet);
 void clear_screen() {system("CLS");}
 bool check_for_farkle(std::vector<Dice>& dice, GameRunner& gameRunner);
+std::vector<Dice> get_last_populated_dice(std::vector<Dice>& dice);
 
 
 int main() {
@@ -54,6 +55,24 @@ int main() {
 
             // Pick dice to keep for the player
             pick_dice_to_keep(diceSet, player, gameRunner);
+            std::vector<std::vector<Dice>> playerDice = player.getSavedDice();
+
+            for (auto d : playerDice) {
+                for (auto dd : d) {
+					std::cout << dd.getValue() << " ";
+				}
+                if (d.empty()) {
+                    std::cout << "Empty!" << std::endl;
+                }
+			}
+
+            /*if (check_for_farkle(get_last_populated_dice(playerDice), gameRunner)) {
+				player.resetTempScore();
+				player.resetSavedDice();
+                cycle_player_turn(players, active_player);
+				continue;
+			}*/
+
 
             // TODO: #1 test hot dice functionality
             if (diceSet.size() == 0) {
@@ -180,13 +199,6 @@ std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player, Ga
         case 'n':
             keepPicking = false;
             player.saveDice(diceToKeep);
-
-            if (check_for_farkle(diceToKeep, gameRunner)) {
-				player.resetTempScore();
-				player.resetSavedDice();
-				return dice;
-			}
-
             return dice;
         case 'C':
             cheat_enter_game(player);
@@ -227,6 +239,13 @@ std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player, Ga
 
 
             player.saveDice(diceToKeep);
+
+            if (check_for_farkle(diceToKeep, gameRunner)) {
+                player.resetTempScore();
+                player.resetSavedDice();
+                return dice;
+            }
+
             diceToKeep.clear(); // Clear the diceToKeep vector
             clear_screen();
 
@@ -385,4 +404,14 @@ bool check_for_farkle(std::vector<Dice>& dice, GameRunner& gameRunner)
 		return true;
 	}
 	return false;
+}
+
+std::vector<Dice> get_last_populated_dice(std::vector<std::vector<Dice>>& dice)
+{
+    for (int i = dice.size() - 1; i >= 0; i--) {
+        if (dice[i].size() > 0) {
+			return dice[i];
+		}
+	}
+    return std::vector<Dice>();
 }

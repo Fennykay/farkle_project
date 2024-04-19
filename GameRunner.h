@@ -23,6 +23,7 @@ public:
     void displayIntroduction();
     void displayRules();
     void displayWinner(Player player);
+    void displayScore(Player& player);
 
     void runPlayerTurn(Player& player, std::vector<Dice> dice);
 
