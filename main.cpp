@@ -55,23 +55,12 @@ int main() {
 
             // Pick dice to keep for the player
             pick_dice_to_keep(diceSet, player, gameRunner);
-            std::vector<std::vector<Dice>> playerDice = player.getSavedDice();
 
-            for (auto d : playerDice) {
-                for (auto dd : d) {
-					std::cout << dd.getValue() << " ";
-				}
-                if (d.empty()) {
-                    std::cout << "Empty!" << std::endl;
-                }
-			}
-
-            /*if (check_for_farkle(get_last_populated_dice(playerDice), gameRunner)) {
-				player.resetTempScore();
-				player.resetSavedDice();
-                cycle_player_turn(players, active_player);
-				continue;
-			}*/
+            if (player.getSavedDice().size() > 1 && check_for_farkle(player.getSavedDice().end()[-2], gameRunner))  {
+                
+            } else {
+                check_for_farkle(player.getSavedDice().end()[-1], gameRunner);
+            }
 
 
             // TODO: #1 test hot dice functionality
@@ -239,12 +228,6 @@ std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player, Ga
 
 
             player.saveDice(diceToKeep);
-
-            if (check_for_farkle(diceToKeep, gameRunner)) {
-                player.resetTempScore();
-                player.resetSavedDice();
-                return dice;
-            }
 
             diceToKeep.clear(); // Clear the diceToKeep vector
             clear_screen();
