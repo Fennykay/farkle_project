@@ -14,6 +14,7 @@ public:
     void resetScore(Player player);
 
     int computeHandScore(const std::vector<std::vector<Dice>>& dice);
+    bool isFarkle(const std::vector<Dice>& dice);
 
     Player getWinner();
     void setWinner(Player player);
@@ -22,6 +23,7 @@ public:
     void displayIntroduction();
     void displayRules();
     void displayWinner(Player player);
+    void displayScore(Player& player);
 
     void runPlayerTurn(Player& player, std::vector<Dice> dice);
 

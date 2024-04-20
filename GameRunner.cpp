@@ -1,10 +1,11 @@
 #include "GameRunner.h"
 #include "Player.h"
-#include <iostream>
-#include <unordered_map>
-#include <iomanip>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <string>
+#include <unordered_map>
+#include <windows.h>
 
 
 
@@ -40,6 +41,12 @@ void GameRunner::displayIntroduction()
 
 void GameRunner::displayRules()
 {
+    const int CONSOLE_TEXT_COLOR_GREEN = 2;
+    const int CONSOLE_TEXT_COLOR_WHITE = 15;
+
+    HANDLE console_color;
+    console_color = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(console_color, CONSOLE_TEXT_COLOR_GREEN);
     // create a file stream object
     std::fstream file(RULES_FILE);
     // string for each line of the file
@@ -52,6 +59,8 @@ void GameRunner::displayRules()
         rules += line + "\n";
     }
     std::cout << rules << std::endl;
+
+    SetConsoleTextAttribute(console_color, CONSOLE_TEXT_COLOR_WHITE);
 }
 
 void GameRunner::displayWinner(Player player)
@@ -59,6 +68,11 @@ void GameRunner::displayWinner(Player player)
     std::cout << "Congratulations " << player.getName() << "!" << std::endl;
 	std::cout << "You have won the game with a score of " << player.getScore() << "!" << std::endl;
 	std::cout << "Thanks for playing!" << std::endl;
+}
+
+void GameRunner::displayScore(Player& player)
+{
+    std::cout << setw(30) << player.getName() << " Score: " << player.getScore() << std::endl;
 }
 
 void GameRunner::runPlayerTurn(Player& player, std::vector<Dice> dice)
@@ -81,6 +95,16 @@ int GameRunner::computeHandScore(const std::vector<std::vector<Dice>>& dice)
     }
 
     return scoreHolder;
+}
+
+bool GameRunner::isFarkle(const std::vector<Dice>& dice)
+{
+    if (computeScore(dice) == 0) {
+        return true;
+    }
+    else {
+		return false;
+	}
 }
 
 Player GameRunner::getWinner()
