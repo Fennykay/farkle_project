@@ -19,13 +19,13 @@ public:
     Player getWinner();
     void setWinner(Player player);
 
-    void displayMenu(Player player);
+    void displayUserMenu(Player player);
     void displayIntroduction();
     void displayRules();
     void displayWinner(Player player);
     void displayScore(Player& player);
-
-    void runPlayerTurn(Player& player, std::vector<Dice> dice);
+    void displayChoicesMenu();
+    void displayScoreBoard(std::vector<Player> players);
 
 private:
     Player player;

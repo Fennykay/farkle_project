@@ -1,11 +1,10 @@
-#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <sstream>
-#include <stdlib.h>
 #include <string>
 #include <thread>
 #include <vector>
+#include <unordered_map>
 
 #include "Dice.h"
 #include "GameRunner.h"
@@ -17,16 +16,21 @@ const int SCORE_TO_WIN = 10000; // Score to win the game
 
 void cheat_add_score(Player& player);
 void cheat_enter_game(Player& player);
+
 std::vector<Player> init_players();
+std::vector<Dice> init_dice();
+
 void print_dice(std::vector<Dice>& dice);
 std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player, GameRunner gameRunner);
-std::vector<Dice> init_dice();
 std::vector<Dice> roll_dice(std::vector<Dice>& dice);
+
 void processPlayerTurn(Player& player, GameRunner& gameRunner);
 void cycle_player_turn(std::vector<Player>& players, std::vector<Player>::iterator& activePlayer);
 void handle_entry_round(Player& player, GameRunner& gameRunner, std::vector<Dice>& diceSet, bool& playerTurn);
 void final_round(std::vector<Player>& players, GameRunner& gameRunner, std::vector<Dice>& diceSet);
-void clear_screen() {system("CLS");}
+
+static void clear_screen() {system("CLS");}
+
 bool check_for_farkle(Player& player, GameRunner& gameRunner);
 
 
@@ -46,11 +50,10 @@ int main() {
     // main game loop
     while (play) {
         Player& player = *active_player; // set reference to the active player for data manipulation
-        roll_dice(diceSet);
 
         if (player.getPassedEntryScore() == true) { // Check if the player has passed the entry score
-
-            gameRunner.displayMenu(player); // Display the player's menu
+            roll_dice(diceSet); // Roll the dice
+            gameRunner.displayUserMenu(player); // Display the player's menu
 
             // Pick dice to keep for the player
             pick_dice_to_keep(diceSet, player, gameRunner);
@@ -102,6 +105,7 @@ int main() {
         } 
         else { // Else handles the entry round
             while (playerTurn == true) {
+                roll_dice(diceSet);
                 handle_entry_round(player, gameRunner, diceSet, playerTurn);
             }
 
@@ -118,6 +122,13 @@ int main() {
     }
     
     final_round(players, gameRunner, diceSet);
+
+    std::cout << std::endl << std::endl;
+    std::cout << "Final Scores:" << std::endl;
+    std::cout << "----------------" << std::endl;
+
+    gameRunner.displayScoreBoard(players);
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 
 // function to add add score mid game
@@ -136,15 +147,18 @@ void cheat_enter_game(Player& player) {
 std::vector<Player> init_players() {
 
     int number_of_players;
+    std::unordered_map<std::string, int> playerNames;
 
     std::cout << "How many players are there? ";
     std::cin >> number_of_players;
     clear_screen();
 
-    if (number_of_players < 2) {
-        std::cerr << "Error: At least 2 players are required." << std::endl;
-        return {}; // Return an empty vector
-    }
+    while (number_of_players < 2) {
+		std::cerr << "Error: At least 2 players are required." << std::endl;
+		std::cout << "How many players are there? ";
+		std::cin >> number_of_players;
+		clear_screen();
+	}
 
     std::vector<Player> players;
 
@@ -154,6 +168,12 @@ std::vector<Player> init_players() {
 
         std::cout << "Enter the name of player " << i + 1 << ": ";
         std::cin >> name;
+
+        while (playerNames.find(name) != playerNames.end()) {
+            std::cout << "Error: Player name already exists. Please enter a different name: ";
+            std::cin >> name;
+        }
+        playerNames[name] = 1;
 
         Player player(name);
         players.emplace_back(player); // Emplace instead of push_back
@@ -189,6 +209,7 @@ std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player, Ga
         case 'n':
             player.saveDice(diceToKeep);
             return dice;
+
         case 'C':
             cheat_enter_game(player);
             return dice;
@@ -230,6 +251,7 @@ std::vector<Dice>& pick_dice_to_keep(std::vector<Dice>& dice, Player& player, Ga
             player.saveDice(diceToKeep);
 
             diceToKeep.clear(); // Clear the diceToKeep vector
+
             clear_screen();
 
         }
@@ -271,14 +293,21 @@ void cycle_player_turn(std::vector<Player>& players, std::vector<Player>::iterat
 }
 // Function to handle the entry round
 void handle_entry_round(Player& player, GameRunner& gameRunner, std::vector<Dice>& diceSet, bool& playerTurn) {
-    gameRunner.displayMenu(player); // Display the player's menu
+    gameRunner.displayUserMenu(player); // Display the player's menu
     pick_dice_to_keep(diceSet, player, gameRunner); // Pick dice to keep for the player
     // Check for Hot Dice
-    if (diceSet.size() == 0) {
+    if (diceSet.size() == 0 && gameRunner.computeHandScore(player.getSavedDice()) > 0) {
         std::cout << "Hot Dice! You get to roll all 6 dice again." << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(2));
         diceSet = init_dice();
         player.addTempScore(gameRunner.computeHandScore(player.getSavedDice())); // Add the score to the temporary score
+        return;
+    }
+    // Check for a Farkle
+    if (check_for_farkle(player, gameRunner)) { // Check for a farkle each roll and submit
+        diceSet = init_dice();
+        clear_screen();
+        playerTurn = false;
         return;
     }
     char input;
@@ -319,6 +348,9 @@ void handle_entry_round(Player& player, GameRunner& gameRunner, std::vector<Dice
         break;
     }
 
+    player.addTempScore(gameRunner.computeHandScore(player.getSavedDice())); // Add the score to the temporary score          
+    player.resetSavedDice(); // Clear the saved dice
+
     std::this_thread::sleep_for(std::chrono::seconds(1));
     roll_dice(diceSet);
     clear_screen();
@@ -348,33 +380,76 @@ void final_round(std::vector<Player>& players, GameRunner& gameRunner, std::vect
         // Keeping this in the case that a user wins before others enter game
         if (player.getPassedEntryScore() == true) {
 
-            gameRunner.displayMenu(player); // Display the player's menu
+            gameRunner.displayUserMenu(player); // Display the player's menu
 
-            // Pick dice to keep for the player
             pick_dice_to_keep(diceSet, player, gameRunner);
+            // Check for Hot Dice
+            if (diceSet.size() == 0 && gameRunner.computeHandScore(player.getSavedDice()) > 0) { // Check for hot dice
+                std::cout << "Hot Dice! You get to roll all 6 dice again." << std::endl;
+                std::this_thread::sleep_for(std::chrono::seconds(2)); // sleep for 2 seconds
+                diceSet = init_dice();
+                player.addTempScore(gameRunner.computeHandScore(player.getSavedDice())); // Add the score to the temporary score
+                continue;
+            }
 
-            std::cout << "Do you want to roll again? (y/n): ";
-            std::cin >> input;
-
-            if (input == 'n') {
-                // Function to process the player's turn
-                processPlayerTurn(player, gameRunner);
-                // If user passes winning score, set as winner
-                if (player.getScore() > gameRunner.getWinner().getScore()) {
-					gameRunner.setWinner(player);
-				}
-                // Check if we have reached final player
-                if (active_player == players.end() - 1) {
-					play = false;
-                }
-                // Move to the next player
+            if (check_for_farkle(player, gameRunner)) { // Check for a farkle each roll and submit
                 cycle_player_turn(players, active_player);
-
-                // Reset the dice set
                 diceSet = init_dice();
                 clear_screen();
+
+                if (active_player == players.end() - 1) {
+                    break;
+                }
+                else {
+                    continue;
+                }
+            }
+            else {
+
+                std::cout << "Do you want to roll again? (y/n): ";
+                std::cin >> input;
+
+
+                if (input == 'n') {
+                    // Function to process the player's turn
+                    processPlayerTurn(player, gameRunner);
+                    // If user passes winning score, set as winner
+                    if (player.getScore() > gameRunner.getWinner().getScore()) {
+                        gameRunner.setWinner(player);
+                    }
+                    // Check if we have reached final player
+                    if (active_player == players.end() - 1) {
+                        play = false;
+                    }
+                    // Move to the next player
+                    cycle_player_turn(players, active_player);
+
+                    // Reset the dice set
+                    diceSet = init_dice();
+                    clear_screen();
+                }
+                else {
+                    player.addTempScore(gameRunner.computeHandScore(player.getSavedDice())); // Add the score to the temporary score
+                    player.resetSavedDice(); // Clear the saved dice
+                }
             }
         }
+        else {
+            // for if user has not entered game but is in final round
+            while (playerTurn == true) {
+				handle_entry_round(player, gameRunner, diceSet, playerTurn);
+			}
+
+			// Move to the next player
+			cycle_player_turn(players, active_player);
+
+			// reinitialize playerturn and dice set
+			playerTurn = true;
+			diceSet = init_dice();
+			roll_dice(diceSet);
+
+			clear_screen();
+		}
     }
 
     gameRunner.displayWinner(gameRunner.getWinner());
